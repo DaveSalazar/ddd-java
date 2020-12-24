@@ -4,8 +4,8 @@ allprojects {
   apply plugin: 'io.spring.dependency-management'
   apply plugin: 'org.springframework.boot'
 
-  sourceCompatibility = 11
-  targetCompatibility = 11
+  sourceCompatibility = 1.8
+  targetCompatibility = 1.8
 
   repositories {
     mavenCentral()
@@ -33,12 +33,27 @@ allprojects {
     implementation 'com.sun.xml.bind:jaxb-impl:2.3.2'
     implementation 'javax.xml.bind:jaxb-api:2.3.1'
     implementation 'org.springframework:spring-context-support:5.2.1.RELEASE'
-    implementation 'org.freemarker:freemarker-gae:2.3.29'
     implementation 'org.reflections:reflections:0.9.11'
     implementation 'org.springframework.boot:spring-boot-starter-amqp'
     implementation 'org.elasticsearch.client:elasticsearch-rest-client:6.8.5'
     implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:6.8.4'
     runtime 'mysql:mysql-connector-java:8.0.18'
+
+    compile group: 'org.postgresql', name: 'postgresql', version: '42.2.14'
+    compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
+    compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
+    compile group: 'org.apache.poi', name: 'poi', version: '3.15'
+    compile group: 'org.apache.poi', name: 'poi-ooxml', version: '3.15'
+    compile group: 'org.apache.poi', name: 'poi-ooxml-schemas', version: '3.15'
+    compile group: 'com.sun.mail', name: 'javax.mail', version: '1.6.2'
+
+    // For web secutity
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    compile 'io.jsonwebtoken:jjwt-api:0.11.2'
+    runtime 'io.jsonwebtoken:jjwt-impl:0.11.2',
+            // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
+            //'org.bouncycastle:bcprov-jdk15on:1.60',
+            'io.jsonwebtoken:jjwt-jackson:0.11.2' // or 'io.jsonwebtoken:jjwt-gson:0.11.2' for gson
 
     // Test
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.2'
@@ -135,19 +150,13 @@ sourceSets {
 
 apply plugin: 'application'
 
-bootJar {
-  baseName = 'java-ddd-skeleton'
-  version = '0.0.1'
-}
-
-mainClassName = 'tv.codely.apps.Starter'
+mainClassName = 'com.application.apps.Starter'
 
 dependencies {
   implementation 'org.springframework.boot:spring-boot-starter-web:2.1.8.RELEASE'
 
   implementation project(":shared")
-  implementation project(":backoffice")
-  implementation project(":mooc")
+  implementation project(":administration")
 
   testImplementation 'org.springframework.boot:spring-boot-starter-test:2.1.8.RELEASE'
   testImplementation project(":shared").sourceSets.test.output

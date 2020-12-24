@@ -1,0 +1,21 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+    <class name="com.application.administration.users.domain.User" table="users">
+        <composite-id name="id" class="com.application.administration.shared.domain.identifiers.UserId" access="field">
+            <key-property column="id" name="value" length="36" access="field" />
+        </composite-id>
+
+        <component name="email" class="com.application.administration.users.domain.UserEmail" access="field">
+            <property name="value" column="email" type="string" access="field" unique-key="emailKey"/>
+        </component>
+
+        <component name="password" class="com.application.administration.users.domain.UserPassword" access="field">
+            <property name="value" column="password" type="string" access="field" />
+        </component>
+
+    </class>
+</hibernate-mapping>

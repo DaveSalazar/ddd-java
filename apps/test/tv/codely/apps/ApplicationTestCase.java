@@ -9,8 +9,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
-import tv.codely.shared.domain.bus.event.DomainEvent;
-import tv.codely.shared.domain.bus.event.EventBus;
+import com.application.shared.domain.bus.event.DomainEvent;
+import com.application.shared.domain.bus.event.EventBus;
 
 import java.util.Arrays;
 
