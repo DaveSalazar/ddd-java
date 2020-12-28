@@ -2,7 +2,7 @@ package com.application.administration.users.application.find;
 
 import com.application.administration.shared.domain.identifiers.UserId;
 import com.application.administration.users.application.UserResponse;
-import com.application.administration.users.domain.UserNotExist;
+import com.application.administration.users.domain.UserNotExists;
 import com.application.administration.users.domain.UserRepository;
 import com.application.shared.domain.Service;
 
@@ -15,9 +15,9 @@ public class UserFinder {
         this.repository = repository;
     }
 
-    public UserResponse find(UserId id) throws UserNotExist {
+    public UserResponse find(UserId id) throws UserNotExists {
         return repository.search(id)
                 .map(UserResponse::fromAggregate)
-                .orElseThrow(() -> new UserNotExist(id));
+                .orElseThrow(() -> new UserNotExists(id));
     }
 }

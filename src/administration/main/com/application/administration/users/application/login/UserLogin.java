@@ -27,7 +27,7 @@ public class UserLogin {
 
     private void ensureUserExist(Optional<User> auth, UserEmail email) {
         if (!auth.isPresent()) {
-            throw new UserNotExist(email);
+            throw new UserNotExists(email);
         }
     }
 
