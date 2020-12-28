@@ -34,7 +34,7 @@ public class AuthPostRegisterController extends ApiController {
         this.param = param;
     }
 
-    @PostMapping(PREFIX + "/auth/signup")
+    @PostMapping(PREFIX + "/auth/register")
     public ResponseEntity handle(@RequestBody RegisterRequest request)
         throws CommandHandlerExecutionError, ParameterNotExist {
 

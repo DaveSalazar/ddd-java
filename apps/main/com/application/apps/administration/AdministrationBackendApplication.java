@@ -12,7 +12,11 @@ import java.util.HashMap;
 @SpringBootApplication(exclude = HibernateJpaAutoConfiguration.class)
 @ComponentScan(
     includeFilters = @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = Service.class),
-    value = {"com.application.shared", "com.application.administration", "com.application.apps.administration"}
+    value = {
+        "com.application.shared",
+        "com.application.administration",
+        "com.application.apps.administration"
+    }
 )
 public class AdministrationBackendApplication {
     public static HashMap<String, Class<?>> commands() {

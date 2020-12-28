@@ -29,6 +29,7 @@ import static com.application.apps.administration.utils.Constants.PREFIX;
 
 @RestController
 public class AuthPostLoginController  extends ApiController {
+
     @Autowired
     private JwtUtil jwtTokenUtil;
     private final Parameter param;
@@ -38,7 +39,7 @@ public class AuthPostLoginController  extends ApiController {
         this.param = param;
     }
 
-    @PostMapping(PREFIX + "/auth/signup")
+    @PostMapping(PREFIX + "/auth/login")
     public ResponseEntity handle(@RequestBody LoginRequest request)
         throws CommandHandlerExecutionError, ParameterNotExist {
 

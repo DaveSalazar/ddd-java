@@ -17,10 +17,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional("client-transaction_manager")
+@Transactional("administration-transaction_manager")
 public class HibernateProfileRepository extends HibernateRepository<Profile> implements ProfileRepository {
 
-    public HibernateProfileRepository(@Qualifier("client-session_factory") SessionFactory sessionFactory) {
+    public HibernateProfileRepository(@Qualifier("administration-session_factory") SessionFactory sessionFactory) {
         super(sessionFactory, Profile.class);
     }
 

@@ -25,6 +25,13 @@ public abstract class HibernateRepository<T> {
         sessionFactory.getCurrentSession().clear();
     }
 
+    protected void remove(Identifier id) {
+        T obj = Optional.ofNullable(sessionFactory.getCurrentSession().byId(aggregateClass).load(id)).get();
+        sessionFactory.getCurrentSession().delete(obj);
+        sessionFactory.getCurrentSession().flush();
+        sessionFactory.getCurrentSession().clear();
+    }
+
     protected Optional<T> byId(Identifier id) {
         return Optional.ofNullable(sessionFactory.getCurrentSession().byId(aggregateClass).load(id));
     }

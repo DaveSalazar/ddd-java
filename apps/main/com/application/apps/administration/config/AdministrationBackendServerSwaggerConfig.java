@@ -50,7 +50,7 @@ public class AdministrationBackendServerSwaggerConfig {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("Sabroso Administration API")
+                .title("App Administration API")
                 .description("")
                 .version("V1.0")
                 .build();
