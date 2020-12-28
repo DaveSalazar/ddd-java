@@ -1,4 +1,4 @@
-package com.application.apps.administration.controller.health_check;
+package com.application.apps.administration.controllers.health_check;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +19,7 @@ public final class HealthCheckGetController extends ApiController {
         super(queryBus, commandBus);
     }
 
-    @GetMapping("/health-check")
+    @GetMapping("/admin/health-check")
     public HashMap<String, String> index() {
         HashMap<String, String> status = new HashMap<>();
         status.put("application", "administration_backend");

@@ -1,4 +1,4 @@
-package com.application.apps.administration.controller.notifications;
+package com.application.apps.administration.controllers.notifications;
 
 import org.junit.jupiter.api.Test;
 import tv.codely.apps.mooc.MoocApplicationTestCase;

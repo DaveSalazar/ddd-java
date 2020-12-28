@@ -1,4 +1,4 @@
-package com.application.apps.administration.controller.health_check;
+package com.application.apps.administration.controllers.health_check;
 
 import org.junit.jupiter.api.Test;
 import tv.codely.apps.mooc.MoocApplicationTestCase;

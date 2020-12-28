@@ -1,4 +1,4 @@
-package com.application.apps.administration.controller.courses;
+package com.application.apps.administration.controllers.courses;
 
 import org.junit.jupiter.api.Test;
 import tv.codely.apps.mooc.MoocApplicationTestCase;
