@@ -10,14 +10,17 @@ public class UserCreator {
 
     private final UserRepository repository;
     private final EventBus eventBus;
+    private final PasswordEncoder encoder;
 
-    public UserCreator(UserRepository repository, EventBus eventBus) {
+    public UserCreator(UserRepository repository, EventBus eventBus, PasswordEncoder encoder) {
         this.repository = repository;
         this.eventBus = eventBus;
+        this.encoder = encoder;
     }
 
     public void create(UserId id, UserEmail email, UserPassword password) {
-        User user = new User(id, email, password);
+        UserPassword pwd = new UserPassword(encoder.encode(password.value()));
+        User user = new User(id, email, pwd);
         repository.save(user);
         eventBus.publish(user.pullDomainEvents());
     }

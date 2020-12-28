@@ -1,5 +1,9 @@
 package com.application.administration.users.application.register;
 
+import com.application.administration.profiles.application.save.ProfileCreator;
+import com.application.administration.profiles.domain.ProfileFirstName;
+import com.application.administration.profiles.domain.ProfileLastName;
+import com.application.administration.shared.domain.identifiers.ProfileId;
 import com.application.administration.users.domain.UserEmail;
 import com.application.administration.users.domain.UserPassword;
 import com.application.administration.shared.domain.identifiers.UserId;
@@ -10,16 +14,24 @@ import com.application.shared.domain.bus.command.CommandHandler;
 public class RegisterUserCommandHandler implements CommandHandler<RegisterUserCommand> {
 
     private UserRegister register;
+    private ProfileCreator profileCreator;
 
-    public RegisterUserCommandHandler(UserRegister register) {
+    public RegisterUserCommandHandler(UserRegister register, ProfileCreator profileCreator) {
         this.register = register;
+        this.profileCreator = profileCreator;
     }
 
     @Override
     public void handle(RegisterUserCommand command) {
-        UserId id = new UserId(command.id());
+        UserId userId = new UserId(command.id());
         UserEmail email = new UserEmail(command.email().toLowerCase());
         UserPassword password = new UserPassword(command.password());
-        register.create(id, email, password);
+
+        ProfileId profileId = new ProfileId();
+        ProfileFirstName firstName = new ProfileFirstName();
+        ProfileLastName lastName = new ProfileLastName();
+
+        register.create(userId, email, password);
+        profileCreator.save(profileId, userId, firstName, lastName);
     }
 }

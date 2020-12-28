@@ -11,18 +11,19 @@ public class UserRegister {
 
     private final UserRepository repository;
     private final EventBus eventBus;
+    private final PasswordEncoder encoder;
 
-    public UserRegister(UserRepository repository, EventBus eventBus) {
+    public UserRegister(UserRepository repository, EventBus eventBus, PasswordEncoder encoder) {
         this.repository = repository;
         this.eventBus = eventBus;
+        this.encoder = encoder;
     }
 
     public void create(UserId id, UserEmail email, UserPassword password) {
-        AdministrationBcryptEncoder encoder = new AdministrationBcryptEncoder();
         UserPassword pwd = new UserPassword(encoder.encode(password.value()));
         User user = new User(id, email, pwd);
         repository.save(user);
-        //eventBus.publish(user.pullDomainEvents());
+        eventBus.publish(user.pullDomainEvents());
     }
 
 }

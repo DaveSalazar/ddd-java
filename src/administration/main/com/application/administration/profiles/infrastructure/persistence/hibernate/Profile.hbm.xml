@@ -1,0 +1,25 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+    <class name="com.application.administration.profiles.domain.Profile" table="profiles">
+        <composite-id name="id" class="com.application.administration.shared.domain.identifiers.ProfileId" access="field">
+            <key-property column="id" name="value" length="36" access="field" />
+        </composite-id>
+
+        <component name="userId" class="com.application.administration.shared.domain.identifiers.UserId" access="field">
+            <property name="value" column="user_id" type="string" access="field" />
+        </component>
+
+        <component name="firstName" class="com.application.administration.profiles.domain.ProfileFirstName" access="field">
+            <property name="value" column="first_name" type="text" access="field" />
+        </component>
+
+        <component name="lastName" class="com.application.administration.profiles.domain.ProfileLastName" access="field">
+            <property name="value" column="last_name" type="string" access="field" />
+        </component>
+
+    </class>
+</hibernate-mapping>
