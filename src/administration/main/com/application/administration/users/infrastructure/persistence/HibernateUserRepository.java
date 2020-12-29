@@ -34,7 +34,7 @@ public class HibernateUserRepository extends HibernateRepository<User> implement
         List<Filter> filters = new ArrayList<>();
         filters.add(new Filter(new FilterField("email"), FilterOperator.EQUAL, new FilterValue(email.value())));
         Criteria criteria = new Criteria(new Filters(filters), FilterOrder.none());
-        return Optional.ofNullable(byCriteria(criteria).get(0));
+        return byCriteria(criteria).stream().findFirst();
     }
 
     @Override
