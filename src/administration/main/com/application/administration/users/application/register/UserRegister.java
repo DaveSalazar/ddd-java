@@ -6,6 +6,9 @@ import com.application.administration.shared.domain.identifiers.UserId;
 import com.application.shared.domain.Service;
 import com.application.shared.domain.bus.event.EventBus;
 
+import javax.persistence.PersistenceException;
+import javax.validation.ConstraintViolationException;
+
 @Service
 public class UserRegister {
 
@@ -20,10 +23,16 @@ public class UserRegister {
     }
 
     public void create(UserId id, UserEmail email, UserPassword password) {
-        UserPassword pwd = new UserPassword(encoder.encode(password.value()));
-        User user = new User(id, email, pwd);
-        repository.save(user);
-        eventBus.publish(user.pullDomainEvents());
+        try {
+            UserPassword pwd = new UserPassword(encoder.encode(password.value()));
+            User user = new User(id, email, pwd);
+            repository.save(user);
+            eventBus.publish(user.pullDomainEvents());
+        } catch (PersistenceException | ConstraintViolationException cve ) {
+            throw new MemberEmailAlreadyExists(email);
+        }catch (Exception e) {
+            throw e;
+        }
     }
 
 }

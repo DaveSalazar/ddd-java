@@ -37,7 +37,7 @@ public class HibernateProfileRepository extends HibernateRepository<Profile> imp
     @Override
     public Optional<Profile> byUserId(UserId id) {
         List<Filter> filters = new ArrayList<>();
-        filters.add(new Filter(new FilterField("memberId"), FilterOperator.EQUAL, new FilterValue(id.value())));
+        filters.add(new Filter(new FilterField("userId"), FilterOperator.EQUAL, new FilterValue(id.value())));
         Criteria criteria = new Criteria(new Filters(filters), FilterOrder.none());
         return byCriteria(criteria).stream().findFirst();
     }

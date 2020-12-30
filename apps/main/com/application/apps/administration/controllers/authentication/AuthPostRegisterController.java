@@ -1,12 +1,15 @@
 package com.application.apps.administration.controllers.authentication;
 
 import com.application.administration.users.application.register.RegisterUserCommand;
+import com.application.administration.users.domain.MemberEmailAlreadyExists;
+import com.application.administration.users.domain.UserNotExists;
 import com.application.apps.administration.Requests.RegisterRequest;
 import com.application.apps.administration.utils.JwtUtil;
 import com.application.shared.domain.DomainError;
 import com.application.shared.domain.bus.command.CommandBus;
 import com.application.shared.domain.bus.command.CommandHandlerExecutionError;
 import com.application.shared.domain.bus.query.QueryBus;
+import com.application.shared.domain.errors.ServerError;
 import com.application.shared.infrastructure.config.Parameter;
 import com.application.shared.infrastructure.config.ParameterNotExist;
 import com.application.shared.infrastructure.spring.ApiController;
@@ -58,6 +61,8 @@ public class AuthPostRegisterController extends ApiController {
 
     @Override
     public HashMap<Class<? extends DomainError>, HttpStatus> errorMapping() {
-        return null;
+        return new HashMap<Class<? extends DomainError>, HttpStatus>() {{
+            put(MemberEmailAlreadyExists.class, HttpStatus.BAD_REQUEST);
+        }};
     }
 }

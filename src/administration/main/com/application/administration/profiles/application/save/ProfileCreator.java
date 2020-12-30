@@ -16,8 +16,8 @@ public class ProfileCreator {
         this.eventBus = eventBus;
     }
 
-    public void save(ProfileId id, UserId memberId, ProfileFirstName firstName, ProfileLastName lastName) {
-        Profile profile = new Profile(id, memberId, firstName, lastName);
+    public void save(ProfileId id, UserId userId, ProfileFirstName firstName, ProfileLastName lastName) {
+        Profile profile = new Profile(id, userId, firstName, lastName);
         repository.save(profile);
         eventBus.publish(profile.pullDomainEvents());
     }
