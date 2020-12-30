@@ -18,10 +18,10 @@ public class CreateProfileCommandHandler implements CommandHandler<CreateProfile
     @Override
     public void handle(CreateProfileCommand command) {
         ProfileId id = new ProfileId(command.id());
-        UserId memberId = new UserId(command.memberId());
+        UserId userId = new UserId(command.userId());
         ProfileFirstName firstName = new ProfileFirstName(command.firstName());
         ProfileLastName lastName = new ProfileLastName(command.lastName());
 
-        creator.save(id, memberId, firstName, lastName);
+        creator.save(id, userId, firstName, lastName);
     }
 }

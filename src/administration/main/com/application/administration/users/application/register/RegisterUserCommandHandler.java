@@ -27,9 +27,9 @@ public class RegisterUserCommandHandler implements CommandHandler<RegisterUserCo
         UserEmail email = new UserEmail(command.email().toLowerCase());
         UserPassword password = new UserPassword(command.password());
 
-        ProfileId profileId = new ProfileId();
-        ProfileFirstName firstName = new ProfileFirstName();
-        ProfileLastName lastName = new ProfileLastName();
+        ProfileId profileId = new ProfileId(command.profileId());
+        ProfileFirstName firstName = new ProfileFirstName(command.firstName());
+        ProfileLastName lastName = new ProfileLastName(command.lastName());
 
         register.create(userId, email, password);
         profileCreator.save(profileId, userId, firstName, lastName);

@@ -77,6 +77,7 @@ public class JwtUtil {
                 .signWith(getSigningKey()).compact();
     }
 
+
     public Boolean validateToken(String token, String user) throws ParameterNotExist {
         final String username = extractUsername(token);
         return (username.equals(user) && !isTokenExpired((token)) );

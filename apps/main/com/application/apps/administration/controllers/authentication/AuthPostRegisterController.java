@@ -38,23 +38,24 @@ public class AuthPostRegisterController extends ApiController {
     public ResponseEntity handle(@RequestBody RegisterRequest request)
         throws CommandHandlerExecutionError, ParameterNotExist {
 
-        dispatch(new RegisterUserCommand(request.getId(), request.getEmail(), request.getPassword(),
+        dispatch(new RegisterUserCommand(request.getId(), request.getProfileId(), request.getEmail(), request.getPassword(),
             request.getFirstName(), request.getLastName()));
 
         final String jwt = jwtTokenUtil.generateToken(
-            request.getEmail().toLowerCase(), request.getId(), param.get("CLIENT_FRONTEND_VERSION"));
+            request.getEmail().toLowerCase(), request.getId(), param.get("ADMINISTRATION_FRONTEND_VERSION"));
 
         return ResponseEntity.ok().body(new HashMap<String, Serializable>() {{
             put("token", jwt);
-            put("userId", request.getId());
-            put("userEmail", request.getEmail());
             put("profile", new HashMap<String, Serializable>() {{
+                put("userId", request.getId());
                 put("profileId", request.getProfileId());
+                put("userEmail", request.getEmail());
                 put("firstName", request.getFirstName());
                 put("lastName", request.getLastName());
             }});
         }});
     }
+
     @Override
     public HashMap<Class<? extends DomainError>, HttpStatus> errorMapping() {
         return null;

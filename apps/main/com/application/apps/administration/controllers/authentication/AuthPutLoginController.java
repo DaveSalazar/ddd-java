@@ -15,6 +15,8 @@ import com.application.shared.domain.errors.ServerError;
 import com.application.shared.infrastructure.config.Parameter;
 import com.application.shared.infrastructure.config.ParameterNotExist;
 import com.application.shared.infrastructure.spring.ApiController;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Authorization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,13 +30,15 @@ import java.util.HashMap;
 import static com.application.apps.administration.utils.Constants.PREFIX;
 
 @RestController
-public class AuthPostLoginController  extends ApiController {
+@ApiOperation(value = "", authorizations = { @Authorization(value="jwtToken") })
+public class AuthPutLoginController extends ApiController {
 
     @Autowired
     private JwtUtil jwtTokenUtil;
+
     private final Parameter param;
 
-    public AuthPostLoginController(QueryBus queryBus, CommandBus commandBus, Parameter param) {
+    public AuthPutLoginController(QueryBus queryBus, CommandBus commandBus, Parameter param) {
         super(queryBus, commandBus);
         this.param = param;
     }
@@ -43,27 +47,29 @@ public class AuthPostLoginController  extends ApiController {
     public ResponseEntity handle(@RequestBody LoginRequest request)
         throws CommandHandlerExecutionError, ParameterNotExist {
 
-        // find Member Data
-        UserResponse user = ask(new AuthenticateUserQuery(request.getEmail(), request.getPassword()));
-        final String jwt = jwtTokenUtil.generateToken(
-            request.getEmail().toLowerCase(), user.id(), param.get("CLIENT_FRONTEND_VERSION"));
+        UserResponse userResponse = ask(new AuthenticateUserQuery(request.getEmail(), request.getPassword()));
+        ProfileResponse profileResponse = ask(new FindProfileByUserQuery(userResponse.id()));
 
-        // Find profile data
-        ProfileResponse profileResponse = ask(new FindProfileByUserQuery(user.id()));
         HashMap<String, Serializable> profile = new HashMap<String, Serializable>() {{
             put("id", profileResponse.id());
-            put("memberId", profileResponse.userId());
+            put("userId", userResponse.id());
+            put("userEmail", userResponse.email());
             put("firstName", profileResponse.firstName());
             put("lastName", profileResponse.lastName());
         }};
 
+        final String jwt = jwtTokenUtil.generateToken(
+            request.getEmail().toLowerCase(),
+            userResponse.id(),
+            param.get("ADMINISTRATION_FRONTEND_VERSION")
+        );
+
         return ResponseEntity.ok().body(new HashMap<String, Serializable>() {{
             put("token", jwt);
-            put("userId", user.id());
-            put("userEmail", user.email());
             put("profile", profile);
         }});
     }
+
 
     @Override
     public HashMap<Class<? extends DomainError>, HttpStatus> errorMapping() {
