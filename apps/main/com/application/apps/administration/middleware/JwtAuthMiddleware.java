@@ -22,7 +22,6 @@ public class JwtAuthMiddleware implements Filter {
     @Autowired
     private JwtUtil jwtUtil;
 
-
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
@@ -49,7 +48,7 @@ public class JwtAuthMiddleware implements Filter {
                 Utils.handleCustomError(response, httpResponse, throwable, 403);
                 return;
             } catch (ExpiredJwtException expiredJwtException) {
-                Utils.handleCustomError(response, httpResponse, new TokenExpired(), 403);
+                Utils.handleCustomError(response, httpResponse, new TokenExpired(), 401);
                 return;
             } catch (ParameterNotExist | Exception throwable) {
                 throwable.printStackTrace();

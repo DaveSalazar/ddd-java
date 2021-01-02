@@ -44,11 +44,14 @@ public class AuthPostRegisterController extends ApiController {
         dispatch(new RegisterUserCommand(request.getId(), request.getProfileId(), request.getEmail(), request.getPassword(),
             request.getFirstName(), request.getLastName()));
 
-        final String jwt = jwtTokenUtil.generateToken(
+        final String token = jwtTokenUtil.generateToken(
+            request.getEmail().toLowerCase(), request.getId(), param.get("ADMINISTRATION_FRONTEND_VERSION"));
+        final String refreshToken = jwtTokenUtil.generateRefreshToken(
             request.getEmail().toLowerCase(), request.getId(), param.get("ADMINISTRATION_FRONTEND_VERSION"));
 
         return ResponseEntity.ok().body(new HashMap<String, Serializable>() {{
-            put("token", jwt);
+            put("token", token);
+            put("refreshToken", refreshToken);
             put("profile", new HashMap<String, Serializable>() {{
                 put("userId", request.getId());
                 put("profileId", request.getProfileId());

@@ -39,20 +39,6 @@ public final class Utils {
         }
     }
 
-    public static String jsonEncode(List<Map<String, Object>> data) {
-        StringBuilder listAsString = new StringBuilder("[");
-        for (Map<String, ?> map : data) {
-            StringBuilder mapAsString = new StringBuilder("{");
-            for (String key : map.keySet()) {
-                mapAsString.append("\"" + key + "\"" + ":" + "\"" + map.get(key) + "\"" + ", ");
-            }
-            mapAsString.delete(mapAsString.length() - 2, mapAsString.length()).append("}");
-            listAsString.append(mapAsString.toString() + ", ");
-        }
-        listAsString.delete(listAsString.length() - 2, listAsString.length()).append("]");
-        return listAsString.toString();
-    }
-
     public static HashMap<String, Serializable> jsonDecode(String body) {
         try {
             return new ObjectMapper().readValue(body, HashMap.class);

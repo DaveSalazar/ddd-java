@@ -4,7 +4,7 @@ import com.application.administration.shared.domain.identifiers.ProfileId;
 import com.application.administration.shared.domain.identifiers.UserId;
 import com.application.shared.domain.AggregateRoot;
 
-public class Profile  extends AggregateRoot {
+public class  Profile  extends AggregateRoot {
 
     private final ProfileId id;
     private final UserId userId;
