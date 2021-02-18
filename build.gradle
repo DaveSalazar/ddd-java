@@ -35,9 +35,6 @@ allprojects {
     implementation 'org.springframework:spring-context-support:5.2.1.RELEASE'
     implementation 'org.reflections:reflections:0.9.11'
     implementation 'org.springframework.boot:spring-boot-starter-amqp'
-    implementation 'org.elasticsearch.client:elasticsearch-rest-client:6.8.5'
-    implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:6.8.4'
-    runtime 'mysql:mysql-connector-java:8.0.18'
 
     compile group: 'org.postgresql', name: 'postgresql', version: '42.2.14'
     compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
@@ -91,7 +88,7 @@ allprojects {
 
 // All subprojects (located in src/*)
 subprojects {
-  group = "tv.codely.${rootProject.name}"
+  group = "app.application.${rootProject.name}"
 
   sourceSets {
     main {

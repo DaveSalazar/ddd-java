@@ -50,10 +50,10 @@ public final class HibernateConfigurationFactory {
         String password
     ) {
         BasicDataSource dataSource = new BasicDataSource();
-        dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        dataSource.setDriverClassName("org.postgresql.Driver");
         dataSource.setUrl(
             String.format(
-                "jdbc:mysql://%s:%s/%s?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC",
+                "jdbc:postgresql://%s:%s/%s",
                 host,
                 port,
                 databaseName
@@ -114,7 +114,7 @@ public final class HibernateConfigurationFactory {
         Properties hibernateProperties = new Properties();
         hibernateProperties.put(AvailableSettings.HBM2DDL_AUTO, "update");
         hibernateProperties.put(AvailableSettings.SHOW_SQL, "false");
-        hibernateProperties.put(AvailableSettings.DIALECT, "org.hibernate.dialect.MySQL8Dialect");
+        hibernateProperties.put(AvailableSettings.DIALECT, "org.hibernate.dialect.PostgreSQLDialect");
 
         return hibernateProperties;
     }
