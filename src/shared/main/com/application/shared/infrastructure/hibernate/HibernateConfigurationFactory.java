@@ -1,6 +1,7 @@
 package com.application.shared.infrastructure.hibernate;
 
 import com.application.shared.domain.Service;
+import com.application.shared.infrastructure.GradleProperties;
 import org.apache.tomcat.dbcp.dbcp2.BasicDataSource;
 import org.hibernate.cfg.AvailableSettings;
 import org.springframework.core.io.FileSystemResource;
@@ -12,14 +13,18 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 import java.io.File;
+import java.io.IOException;
+import java.sql.Connection;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("ToArrayCallWithZeroLengthArrayArgument")
 @Service
 public final class HibernateConfigurationFactory {
     private final ResourcePatternResolver resourceResolver;
 
     public HibernateConfigurationFactory(ResourcePatternResolver resourceResolver) {
+        System.out.println("Configuring hibernate");
         this.resourceResolver = resourceResolver;
     }
 
@@ -82,7 +87,15 @@ public final class HibernateConfigurationFactory {
     }
 
     private List<String> subdirectoriesFor(String contextName) {
-        String path = "./src/" + contextName + "/main/com/application/" + contextName + "/";
+        String projectName;
+        try {
+            GradleProperties properties = new GradleProperties();
+            projectName = properties.getProperty("rootProject.name");
+        } catch (IOException e) {
+            projectName = "application";
+            e.printStackTrace();
+        }
+        String path = "./src/" + contextName + "/main/com/" + projectName + "/" + contextName + "/";
 
         String[] files = new File(path).list((current, name) -> new File(current, name).isDirectory());
 
@@ -115,6 +128,7 @@ public final class HibernateConfigurationFactory {
         hibernateProperties.put(AvailableSettings.HBM2DDL_AUTO, "update");
         hibernateProperties.put(AvailableSettings.SHOW_SQL, "false");
         hibernateProperties.put(AvailableSettings.DIALECT, "org.hibernate.dialect.PostgreSQLDialect");
+        hibernateProperties.put(AvailableSettings.ISOLATION, String.valueOf(Connection.TRANSACTION_REPEATABLE_READ));
 
         return hibernateProperties;
     }

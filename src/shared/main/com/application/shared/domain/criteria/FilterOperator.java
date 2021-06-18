@@ -5,6 +5,8 @@ public enum FilterOperator {
     NOT_EQUAL("!="),
     GT(">"),
     LT("<"),
+    GE(">="),
+    LE("<="),
     CONTAINS("CONTAINS"),
     NOT_CONTAINS("NOT_CONTAINS"),
     BETWEEN("BETWEEN");
@@ -21,6 +23,8 @@ public enum FilterOperator {
             case "!=": return FilterOperator.NOT_EQUAL;
             case ">": return FilterOperator.GT;
             case "<": return FilterOperator.LT;
+            case ">=": return FilterOperator.GE;
+            case "<=": return FilterOperator.LE;
             case "CONTAINS": return FilterOperator.CONTAINS;
             case "NOT_CONTAINS": return FilterOperator.NOT_CONTAINS;
             case "BETWEEN": return FilterOperator.BETWEEN;

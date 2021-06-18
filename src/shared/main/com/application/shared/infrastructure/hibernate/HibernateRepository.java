@@ -3,6 +3,7 @@ package com.application.shared.infrastructure.hibernate;
 import com.application.shared.domain.Identifier;
 import com.application.shared.domain.criteria.Criteria;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
 
 import javax.persistence.criteria.CriteriaQuery;
 import java.util.List;
@@ -38,8 +39,14 @@ public abstract class HibernateRepository<T> {
 
     protected List<T> byCriteria(Criteria criteria) {
         CriteriaQuery<T> hibernateCriteria = criteriaConverter.convert(criteria, aggregateClass);
-
-        return sessionFactory.getCurrentSession().createQuery(hibernateCriteria).getResultList();
+        Query<T> query = sessionFactory.getCurrentSession().createQuery(hibernateCriteria);
+        if(criteria.limit().isPresent()) {
+            query = query.setMaxResults(criteria.limit().get());
+        }
+        if(criteria.offset().isPresent()) {
+            query = query.setFirstResult(criteria.offset().get());
+        }
+        return query.getResultList();
     }
 
     protected List<T> all() {

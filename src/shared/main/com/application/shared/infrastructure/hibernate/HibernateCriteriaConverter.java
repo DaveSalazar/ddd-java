@@ -3,6 +3,7 @@ package com.application.shared.infrastructure.hibernate;
 import com.application.shared.domain.criteria.Criteria;
 import com.application.shared.domain.criteria.Filter;
 import com.application.shared.domain.criteria.FilterOperator;
+import com.application.shared.domain.errors.InvalidDateFormat;
 
 import javax.persistence.criteria.*;
 import java.text.SimpleDateFormat;
@@ -12,16 +13,22 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import static com.application.shared.domain.Constants.DATETIME_FORMAT;
+import static com.application.shared.domain.Constants.DATE_FORMAT;
+
 public final class HibernateCriteriaConverter<T> {
     private final CriteriaBuilder                                                 builder;
     private final HashMap<FilterOperator, BiFunction<Filter, Root<T>, Predicate>>
-        predicateTransformers = new HashMap<FilterOperator, BiFunction<Filter, Root<T>, Predicate>>() {{
+        predicateTransformers = new HashMap<>() {{
         put(FilterOperator.EQUAL, HibernateCriteriaConverter.this::equalsPredicateTransformer);
         put(FilterOperator.NOT_EQUAL, HibernateCriteriaConverter.this::notEqualsPredicateTransformer);
         put(FilterOperator.GT, HibernateCriteriaConverter.this::greaterThanPredicateTransformer);
         put(FilterOperator.LT, HibernateCriteriaConverter.this::lowerThanPredicateTransformer);
+        put(FilterOperator.GE, HibernateCriteriaConverter.this::greaterEqualThanPredicateTransformer);
+        put(FilterOperator.LE, HibernateCriteriaConverter.this::lowerEqualThanPredicateTransformer);
         put(FilterOperator.CONTAINS, HibernateCriteriaConverter.this::containsPredicateTransformer);
         put(FilterOperator.NOT_CONTAINS, HibernateCriteriaConverter.this::notContainsPredicateTransformer);
+        put(FilterOperator.BETWEEN, HibernateCriteriaConverter.this::betweenPredicateTransformer);
     }};
     public HibernateCriteriaConverter(CriteriaBuilder builder) {
         this.builder = builder;
@@ -44,10 +51,9 @@ public final class HibernateCriteriaConverter<T> {
     }
 
     private Predicate[] formatPredicates(List<Filter> filters, Root<T> root) {
-        List<Predicate> predicates = filters.stream().map(filter -> formatPredicate(
-            filter,
-            root
-        )).collect(Collectors.toList());
+        List<Predicate> predicates = filters.stream()
+            .map(filter -> formatPredicate(filter, root))
+            .collect(Collectors.toList());
 
         Predicate[] predicatesArray = new Predicate[predicates.size()];
         predicatesArray = predicates.toArray(predicatesArray);
@@ -65,45 +71,32 @@ public final class HibernateCriteriaConverter<T> {
 
         Class<? extends Class<?>> rootType = root.get(filter.field().value()).type().getJavaType();
         Expression<String> rootObj;
-        String superclass = rootType.getSuperclass().toString();
-        if(rootType.toString().contains("java.lang.String") || rootType.isPrimitive()) {
+        if(isPrimitiveOrWrapper(rootType)) {
             rootObj = root.get(filter.field().value());
-        } else if(rootType.toString().contains("java.util.Date")|| superclass.contains("DateValueObject")) {
-            Date parsedDate = null;
-            try {
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                parsedDate = formatter.parse(filter.value().value());
-            }catch (Exception e) {
-                System.out.println("Error parsing on order creator");
-            }
-            if( superclass.contains("DateValueObject")) {
-                return builder.equal(root.get(filter.field().value()).get("value"), parsedDate);
-            }
+        } else if(rootType.toString().contains("java.util.Date") ) {
+            Date parsedDate = getDateTime(filter.value().value());
             return builder.equal(root.<Date>get(filter.field().value()), parsedDate);
+        }  else if(isDateOrDateTimeValueObject(rootType)) {
+            Date parsedDate = getDateTime(filter.value().value());
+            return builder.equal(root.get(filter.field().value()).get("value"), parsedDate);
         } else {
             rootObj = root.get(filter.field().value()).get("value");
         }
         return builder.equal(rootObj, filter.value().value());
     }
 
+
     private Predicate notEqualsPredicateTransformer(Filter filter, Root<T> root) {
         Class<? extends Class<?>> rootType = root.get(filter.field().value()).type().getJavaType();
         Expression<String> rootObj;
-        String superclass = rootType.getSuperclass().toString();
-        if(rootType.toString().contains("java.lang.String") || rootType.isPrimitive()) {
+        if(isPrimitiveOrWrapper(rootType)) {
             rootObj = root.get(filter.field().value());
-        } else if(rootType.toString().contains("java.util.Date")) {
-            Date parsedDate = null;
-            try {
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                parsedDate = formatter.parse(filter.value().value());
-            }catch (Exception e) {
-                System.out.println("Error parsing on order creator");
-            }
-            if( superclass.contains("DateValueObject")) {
-                return builder.notEqual(root.get(filter.field().value()).get("value"), parsedDate);
-            }
+        } else if(rootType.toString().contains("java.util.Date") ) {
+            Date parsedDate = getDateTime(filter.value().value());
             return builder.notEqual(root.<Date>get(filter.field().value()), parsedDate);
+        }  else if(isDateOrDateTimeValueObject(rootType)) {
+            Date parsedDate = getDateTime(filter.value().value());
+            return builder.notEqual(root.get(filter.field().value()).get("value"), parsedDate);
         } else {
             rootObj = root.get(filter.field().value()).get("value");
         }
@@ -113,21 +106,14 @@ public final class HibernateCriteriaConverter<T> {
     private Predicate greaterThanPredicateTransformer(Filter filter, Root<T> root) {
         Class<? extends Class<?>> rootType = root.get(filter.field().value()).type().getJavaType();
         Expression<String> rootObj;
-        String superclass = rootType.getSuperclass().toString();
-        if(rootType.toString().contains("java.lang.String") || rootType.isPrimitive()) {
+        if(isPrimitiveOrWrapper(rootType)) {
             rootObj = root.get(filter.field().value());
-        } else if(rootType.toString().contains("java.util.Date") || superclass.contains("DateValueObject")) {
-            Date parsedDate = null;
-            try {
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                parsedDate = formatter.parse(filter.value().value());
-            }catch (Exception e) {
-                System.out.println("Error parsing on order creator");
-            }
-            if( superclass.contains("DateValueObject")) {
-                return builder.greaterThan(root.<Date>get(filter.field().value()).get("value"), parsedDate);
-            }
-            return builder.greaterThan(root.<Date>get(filter.field().value()), parsedDate);
+        } else if(rootType.toString().contains("java.util.Date")) {
+            Date parsedDate = getDateTime(filter.value().value());
+            return builder.greaterThan(root.get(filter.field().value()), parsedDate);
+        }  else if(isDateOrDateTimeValueObject(rootType)) {
+            Date parsedDate = getDateTime(filter.value().value());
+            return builder.greaterThan(root.get(filter.field().value()).get("value"), parsedDate);
         } else {
             rootObj = root.get(filter.field().value()).get("value");
         }
@@ -137,21 +123,14 @@ public final class HibernateCriteriaConverter<T> {
     private Predicate lowerThanPredicateTransformer(Filter filter, Root<T> root) {
         Class<? extends Class<?>> rootType = root.get(filter.field().value()).type().getJavaType();
         Expression<String> rootObj;
-        String superclass = rootType.getSuperclass().toString();
-        if(rootType.toString().contains("java.lang.String") || rootType.isPrimitive()) {
+        if(isPrimitiveOrWrapper(rootType)) {
             rootObj = root.get(filter.field().value());
-        } else if(rootType.toString().contains("java.util.Date") || superclass.contains("DateValueObject")) {
-            Date parsedDate = null;
-            try {
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                parsedDate = formatter.parse(filter.value().value());
-            }catch (Exception e) {
-                System.out.println("Error parsing on order creator");
-            }
-            if( superclass.contains("DateValueObject")) {
-                return builder.lessThan(root.<Date>get(filter.field().value()).get("value"), parsedDate);
-            }
-            return builder.lessThan(root.<Date>get(filter.field().value()), parsedDate);
+        } else if(rootType.toString().contains("java.util.Date") ) {
+            Date parsedDate = getDateTime(filter.value().value());
+            return builder.lessThan(root.get(filter.field().value()), parsedDate);
+        }  else if(isDateOrDateTimeValueObject(rootType)) {
+            Date parsedDate = getDateTime(filter.value().value());
+            return builder.lessThan(root.get(filter.field().value()).get("value"), parsedDate);
         } else {
             rootObj = root.get(filter.field().value()).get("value");
         }
@@ -161,21 +140,14 @@ public final class HibernateCriteriaConverter<T> {
     private Predicate greaterEqualThanPredicateTransformer(Filter filter, Root<T> root) {
         Class<? extends Class<?>> rootType = root.get(filter.field().value()).type().getJavaType();
         Expression<String> rootObj;
-        String superclass = rootType.getSuperclass().toString();
-        if(rootType.toString().contains("java.lang.String") || rootType.isPrimitive()) {
+        if(isPrimitiveOrWrapper(rootType)) {
             rootObj = root.get(filter.field().value());
-        } else if(rootType.toString().contains("java.util.Date") || superclass.contains("DateValueObject")) {
-            Date parsedDate = null;
-            try {
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                parsedDate = formatter.parse(filter.value().value());
-            }catch (Exception e) {
-                System.out.println("Error parsing on order creator");
-            }
-            if( superclass.contains("DateValueObject")) {
-                return builder.greaterThanOrEqualTo(root.<Date>get(filter.field().value()).get("value"), parsedDate);
-            }
-            return builder.greaterThanOrEqualTo(root.<Date>get(filter.field().value()), parsedDate);
+        } else if(rootType.toString().contains("java.util.Date") ) {
+            Date parsedDate = getDateTime(filter.value().value());
+            return builder.greaterThanOrEqualTo(root.get(filter.field().value()), parsedDate);
+        }  else if(isDateOrDateTimeValueObject(rootType)) {
+            Date parsedDate = getDateTime(filter.value().value());
+            return builder.greaterThanOrEqualTo(root.get(filter.field().value()).get("value"), parsedDate);
         } else {
             rootObj = root.get(filter.field().value()).get("value");
         }
@@ -185,31 +157,26 @@ public final class HibernateCriteriaConverter<T> {
     private Predicate lowerEqualThanPredicateTransformer(Filter filter, Root<T> root) {
         Class<? extends Class<?>> rootType = root.get(filter.field().value()).type().getJavaType();
         Expression<String> rootObj;
-        String superclass = rootType.getSuperclass().toString();
-        if(rootType.toString().contains("java.lang.String") || rootType.isPrimitive()) {
+        if(isPrimitiveOrWrapper(rootType)) {
             rootObj = root.get(filter.field().value());
-        } else if(rootType.toString().contains("java.util.Date") || superclass.contains("DateValueObject")) {
-            Date parsedDate = null;
-            try {
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                parsedDate = formatter.parse(filter.value().value());
-            }catch (Exception e) {
-                System.out.println("Error parsing on order creator");
-            }
-            if( superclass.contains("DateValueObject")) {
-                return builder.lessThanOrEqualTo(root.<Date>get(filter.field().value()).get("value"), parsedDate);
-            }
-            return builder.lessThanOrEqualTo(root.<Date>get(filter.field().value()), parsedDate);
+        } else if(rootType.toString().contains("java.util.Date") ) {
+            Date parsedDate = getDateTime(filter.value().value());
+            return builder.lessThanOrEqualTo(root.get(filter.field().value()), parsedDate);
+        }  else if(isDateOrDateTimeValueObject(rootType)) {
+            Date parsedDate = getDateTime(filter.value().value());
+            return builder.lessThanOrEqualTo(root.get(filter.field().value()).get("value"), parsedDate);
         } else {
             rootObj = root.get(filter.field().value()).get("value");
         }
         return builder.lessThanOrEqualTo(rootObj, filter.value().value());
     }
 
+
+
     private Predicate containsPredicateTransformer(Filter filter, Root<T> root) {
         Class<? extends Class<?>> rootType = root.get(filter.field().value()).type().getJavaType();
         Expression<String> rootObj;
-        if(rootType.toString().contains("java.lang.String") || rootType.isPrimitive()) {
+        if(isPrimitiveOrWrapper(rootType)) {
             rootObj = root.get(filter.field().value());
         } else {
             rootObj = root.get(filter.field().value()).get("value");
@@ -220,7 +187,7 @@ public final class HibernateCriteriaConverter<T> {
     private Predicate notContainsPredicateTransformer(Filter filter, Root<T> root) {
         Class<? extends Class<?>> rootType = root.get(filter.field().value()).type().getJavaType();
         Expression<String> rootObj;
-        if(rootType.toString().contains("java.lang.String") || rootType.isPrimitive()) {
+        if(isPrimitiveOrWrapper(rootType)) {
             rootObj = root.get(filter.field().value());
         } else {
             rootObj = root.get(filter.field().value()).get("value");
@@ -231,27 +198,50 @@ public final class HibernateCriteriaConverter<T> {
     private Predicate betweenPredicateTransformer(Filter filter, Root<T> root) {
         Class<? extends Class<?>> rootType = root.get(filter.field().value()).type().getJavaType();
         Expression<String> rootObj;
-        String superclass = rootType.getSuperclass().toString();
         String value1 = filter.value().toString().split(",")[0];
         String value2 = filter.value().toString().split(",")[1];
-        if(rootType.toString().contains("java.lang.String") || rootType.isPrimitive()) {
+        if(isPrimitiveOrWrapper(rootType)) {
             rootObj = root.get(filter.field().value());
-        } else if(rootType.toString().contains("java.util.Date") || superclass.contains("DateValueObject")) {
-            Date parsedDate1 = null, parsedDate2 = null;
-            try {
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                parsedDate1 = formatter.parse(value1);
-                parsedDate2 = formatter.parse(value2);
-            }catch (Exception e) {
-                System.out.println("Error parsing on order creator");
-            }
-            if( superclass.contains("DateValueObject")) {
-                return builder.between(root.<Date>get(filter.field().value()).get("value"), parsedDate1, parsedDate2);
-            }
-            return builder.between(root.<Date>get(filter.field().value()), parsedDate1, parsedDate2);
+        } else if(rootType.toString().contains("java.util.Date")) {
+            Date parsedDate1 = getDateTime(value1);
+            Date parsedDate2 = getDateTime(value2);
+            return builder.between(root.get(filter.field().value()), parsedDate1, parsedDate2);
+        }  else if(isDateOrDateTimeValueObject(rootType)) {
+            Date parsedDate1 = getDateTime(value1);
+            Date parsedDate2 = getDateTime(value2);
+            return builder.between(root.get(filter.field().value()).get("value"), parsedDate1, parsedDate2);
         } else {
             rootObj = root.get(filter.field().value()).get("value");
         }
         return builder.between(rootObj, value1, value2);
+    }
+
+    private boolean isDateOrDateTimeValueObject(Class<? extends Class<?>> type) {
+        String superclass = type.getSuperclass().toString();
+        return superclass.contains("DateValueObject") || superclass.contains("DateTimeValueObject");
+    }
+
+    private boolean isPrimitiveOrWrapper(Class<? extends Class<?>> type) {
+        return type.toString().contains("java.lang.String") || type.toString().contains("BigDecimal")
+            || type.isPrimitive();
+    }
+
+
+    private Date getDateTime(String dateTime) {
+        Date parsedDate;
+        SimpleDateFormat formatter;
+
+        if(dateTime.split(" ").length > 1)
+            formatter = new SimpleDateFormat(DATETIME_FORMAT);
+        else
+            formatter = new SimpleDateFormat(DATE_FORMAT);
+
+        try {
+            parsedDate = formatter.parse(dateTime);
+        } catch (Exception e) {
+            throw new InvalidDateFormat(dateTime);
+        }
+
+        return parsedDate;
     }
 }
