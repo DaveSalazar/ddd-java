@@ -3,7 +3,7 @@ COPY --chown=gradle:gradle . /home/gradle/src
 WORKDIR /home/gradle/src
 RUN gradle build --no-daemon --warning-mode all
 
-FROM openjdk:8-alpine
+FROM amazoncorretto:11.0.10-alpine
 COPY --from=build /home/gradle/src/build/libs/application.jar /app/application.jar
 RUN mkdir -p /app/apps/main/resources
 COPY ./src /app/src
